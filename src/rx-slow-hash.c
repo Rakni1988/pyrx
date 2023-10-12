@@ -224,7 +224,7 @@ void rx_slow_hash(const uint64_t mainheight, const uint64_t seedheight, const ch
   cache = rx_sp->rs_cache;
   if (cache == NULL) {
     if (cache == NULL) {
-      cache = randomx_alloc_cache(RANDOMX_FLAG_FULL_MEM);
+      cache = randomx_alloc_cache(RANDOMX_FLAG_DEFAULT);
       if (cache == NULL) {
         mdebug(RX_LOGCAT, "Couldn't use largePages for RandomX cache");
         cache = randomx_alloc_cache(flags);
@@ -243,13 +243,13 @@ void rx_slow_hash(const uint64_t mainheight, const uint64_t seedheight, const ch
     if ((flags & RANDOMX_FLAG_JIT) && !miners) {
         flags |= RANDOMX_FLAG_SECURE & ~disabled_flags();
     }
-    if (miners && (disabled_flags() & RANDOMX_FLAG_FULL_MEM)) {
+    if (miners && (disabled_flags() & RANDOMX_FLAG_DEFAULT)) {
       miners = 0;
     }
     if (miners) {
       CTHR_MUTEX_LOCK(rx_dataset_mutex);
       if (rx_dataset == NULL) {
-        rx_dataset = randomx_alloc_dataset(RANDOMX_FLAG_FULL_MEM);
+        rx_dataset = randomx_alloc_dataset(RANDOMX_FLAG_DEFAULT);
         if (rx_dataset == NULL) {
           mdebug(RX_LOGCAT, "Couldn't use largePages for RandomX dataset");
           rx_dataset = randomx_alloc_dataset(RANDOMX_FLAG_DEFAULT);
