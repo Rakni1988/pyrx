@@ -224,13 +224,25 @@ void rx_slow_hash(const uint64_t mainheight, const uint64_t seedheight, const ch
   cache = rx_sp->rs_cache;
   if (cache == NULL) {
     if (cache == NULL) {
-      cache = randomx_alloc_cache(RANDOMX_FLAG_FULL_MEM);
-      if (cache == NULL) {
-        mdebug(RX_LOGCAT, "Couldn't use largePages for RandomX cache");
-        cache = randomx_alloc_cache(flags);
+      flags |= RANDOMX_FLAG_JIT | RANDOMX_FLAG_FULL_MEM;
+  
+      // Sprawdź, czy JIT jest dostępne
+      if (!(enabled_flags() & RANDOMX_FLAG_JIT)) {
+        mdebug(RX_LOGCAT, "JIT compilation not available, disabling JIT");
+        flags &= ~RANDOMX_FLAG_JIT;
       }
-      if (cache == NULL)
+  
+      // Sprawdź, czy full mem jest dostępne
+      if (!(enabled_flags() & RANDOMX_FLAG_FULL_MEM)) {
+        mdebug(RX_LOGCAT, "Full mem not available, disabling full mem");
+        flags &= ~RANDOMX_FLAG_FULL_MEM;
+      }
+  
+      cache = randomx_alloc_cache(flags);
+      if (cache == NULL) {
+        mdebug(RX_LOGCAT, "Couldn't allocate RandomX cache");
         local_abort("Couldn't allocate RandomX cache");
+      }
     }
   }
   if (rx_sp->rs_height != seedheight || rx_sp->rs_cache == NULL || memcmp(seedhash, rx_sp->rs_hash, HASH_SIZE)) {
@@ -249,7 +261,7 @@ void rx_slow_hash(const uint64_t mainheight, const uint64_t seedheight, const ch
     if (miners) {
       CTHR_MUTEX_LOCK(rx_dataset_mutex);
       if (rx_dataset == NULL) {
-        rx_dataset = randomx_alloc_dataset(RANDOMX_FLAG_FULL_MEM);
+        rx_dataset = randomx_alloc_dataset(RANDOMX_FLAG_LARGE_PAGES);
         if (rx_dataset == NULL) {
           mdebug(RX_LOGCAT, "Couldn't use largePages for RandomX dataset");
           rx_dataset = randomx_alloc_dataset(RANDOMX_FLAG_DEFAULT);
@@ -265,7 +277,7 @@ void rx_slow_hash(const uint64_t mainheight, const uint64_t seedheight, const ch
       }
       CTHR_MUTEX_UNLOCK(rx_dataset_mutex);
     }
-    rx_vm = randomx_create_vm(flags, rx_sp->rs_cache, rx_dataset);
+    rx_vm = randomx_create_vm(flags | RANDOMX_FLAG_LARGE_PAGES, rx_sp->rs_cache, rx_dataset);
     if(rx_vm == NULL) { //large pages failed
       mdebug(RX_LOGCAT, "Couldn't use largePages for RandomX VM");
       rx_vm = randomx_create_vm(flags, rx_sp->rs_cache, rx_dataset);
@@ -313,4 +325,3 @@ void rx_stop_mining(void) {
   }
   CTHR_MUTEX_UNLOCK(rx_dataset_mutex);
 }
-
