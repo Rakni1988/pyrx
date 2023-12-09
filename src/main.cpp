@@ -45,7 +45,7 @@ struct PyRX {
         std::string output;
         output.resize(32);
         rx_slow_hash(height, seed_height, seed_hash.data(),
-                input.data(), input.size(), &output[0], 1, 0);
+                input.data(), input.size(), &output[0], 0, 0);
         return output;
     }
 };
