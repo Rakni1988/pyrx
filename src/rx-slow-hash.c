@@ -223,26 +223,24 @@ void rx_slow_hash(const uint64_t mainheight, const uint64_t seedheight, const ch
 
   cache = rx_sp->rs_cache;
   if (cache == NULL) {
+    flags |= RANDOMX_FLAG_JIT | RANDOMX_FLAG_FULL_MEM;
+
+    if (!(enabled_flags() & RANDOMX_FLAG_JIT)) {
+      mdebug(RX_LOGCAT, "JIT compilation not available, disabling JIT");
+      flags &= ~RANDOMX_FLAG_JIT;
+    }
+
+    if (!(enabled_flags() & RANDOMX_FLAG_FULL_MEM)) {
+      mdebug(RX_LOGCAT, "Full mem not available, disabling full mem");
+      flags &= ~RANDOMX_FLAG_FULL_MEM;
+    }
+
+    flags |= RANDOMX_FLAG_DEFAULT;
+
+    cache = randomx_alloc_cache(flags);
     if (cache == NULL) {
-      flags |= RANDOMX_FLAG_JIT | RANDOMX_FLAG_FULL_MEM;
-  
-      // Sprawdź, czy JIT jest dostępne
-      if (!(enabled_flags() & RANDOMX_FLAG_JIT)) {
-        mdebug(RX_LOGCAT, "JIT compilation not available, disabling JIT");
-        flags &= ~RANDOMX_FLAG_JIT;
-      }
-  
-      // Sprawdź, czy full mem jest dostępne
-      if (!(enabled_flags() & RANDOMX_FLAG_FULL_MEM)) {
-        mdebug(RX_LOGCAT, "Full mem not available, disabling full mem");
-        flags &= ~RANDOMX_FLAG_FULL_MEM;
-      }
-  
-      cache = randomx_alloc_cache(flags);
-      if (cache == NULL) {
-        mdebug(RX_LOGCAT, "Couldn't allocate RandomX cache");
-        local_abort("Couldn't allocate RandomX cache");
-      }
+      mdebug(RX_LOGCAT, "Couldn't allocate RandomX cache");
+      local_abort("Couldn't allocate RandomX cache");
     }
   }
   if (rx_sp->rs_height != seedheight || rx_sp->rs_cache == NULL || memcmp(seedhash, rx_sp->rs_hash, HASH_SIZE)) {
