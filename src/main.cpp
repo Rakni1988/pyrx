@@ -41,12 +41,11 @@ struct PyRX {
     py::bytes get_rx_hash(const std::string &input,
             const std::string &seed_hash, const uint64_t height)
     {
-        static unsigned miners = std::thread::hardware_concurrency();
         uint64_t seed_height = rx_seedheight(height);
         std::string output;
         output.resize(32);
         rx_slow_hash(height, seed_height, seed_hash.data(),
-                input.data(), input.size(), &output[0], miners, 0);
+                input.data(), input.size(), &output[0], 1, 0);
         return output;
     }
 };
