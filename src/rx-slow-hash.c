@@ -223,7 +223,7 @@ void rx_slow_hash(const uint64_t mainheight, const uint64_t seedheight, const ch
 
   cache = rx_sp->rs_cache;
   if (cache == NULL) {
-      flags |= RANDOMX_FLAG_JIT | RANDOMX_FLAG_SSSE3 | RANDOMX_FLAG_DEFAULT;
+      flags |= RANDOMX_FLAG_JIT | RANDOMX_FLAG_ARGON2_SSSE3 | RANDOMX_FLAG_DEFAULT;
   
       if (!(enabled_flags() & RANDOMX_FLAG_JIT)) {
           mdebug(RX_LOGCAT, "JIT compilation not available, disabling JIT");
