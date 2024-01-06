@@ -311,7 +311,6 @@ void rx_slow_hash(const uint64_t mainheight, const uint64_t seedheight, const ch
   if (!is_alt)
       CTHR_MUTEX_UNLOCK(rx_sp->rs_mutex);
   
-  mdebug(RX_LOGCAT, "Calculating RandomX hash...");
   randomx_calculate_hash(rx_vm, data, length, hash);
   
   /* altchain slot users always get fully serialized */
